@@ -1,0 +1,540 @@
+to create : npx create-next-app@latest
+tsconfig.json - configuration file for typescript , what should be type checked and ignored
+tailwind.config.ts - additonal tailwind setup
+postcss.config.mjs - configuration file for post css , to process css with diff plugin(tailwind css as plugin)
+package.json - all dependencies 
+in package.json >
+scripts :
+dev - start in development mode
+build - create optimized production of the app
+start - start next js in production mode
+lint - which runs eslint in all file 
+
+next-env.d.ts - typescript collaboration file for nextjs (should not be edited)
+next.config.ts - edited  , allows to config nextjs features , experimental option , built setting etc 
+
+public - to store media files 
+node_modules - all modules are in this folder 
+
+app folder - which is importand folder in which our app is located
+page.tsx  - primary homepage
+globals.css - you can write your custom css
+
+layout.tsx - entry point of your application , if something changes , that changes can be seen in all pages ,
+Example -  i change meta- title , now it can seen in all the pages
+
+favicon.ico - this is the icon which was used in primary homepage
+
+video create using arc browser - which have left side showing tab and right side browser page
+
+- t0 run the app;ocatipm : npm run dev
+
+------------------------ Let's make Hand Dirty---------------------------------------------
+
+Architecture of Next.js 
+
+- Next.js is using server componet 
+To confirm it ther is one technique :
+
+in page.tsx 
+
+import Image from "next/image";
+
+export default function Home() {
+  console.log('what am i doing here? server/client ? ');
+
+  return (
+    <h1 className="text-5xl">Welcom to Next js first project</h1>
+  );
+}
+
+save and open the console and refresh the browser - output is like below -
+
+Then - what am i doing here? server/client ?  will not show in console , it is showing in terminal 
+        and above the console , it is rendered like this :  Server  what am i doing here? server/client ? 
+
+server side componet - it reduce the js code , if we need to direct access to the server side resources
+it also keep safe of .env file - means sensative info 
+
+<> - this is react fragement
+
+Client componet is also used in the Next Js - when we need to interact with the User
+
+To check it -
+app/componets/hello.tsx (code)
+'use client';
+
+function Hello(){
+    console.log("I am a client component");
+
+    return(
+        <div>
+            <h1>Hello</h1>
+        </div>
+    );
+}
+
+export default Hello;
+
+in page.tsx - importing that hello.tsx and rendering 
+
+import Image from "next/image";
+import Hello from "@/app/components/hello";
+
+export default function Home() {
+  console.log('what am i doing here? server/client ? ');
+
+  return (
+    <>
+      <h1 className="text-5xl">Welcom to Next js first project</h1>
+      <Hello />
+    </>
+  );
+}
+
+
+Result - Client component is also seen in main component
+        - in console , there is message like - i am a client component
+        - in terminal also there is message like : what am i doing here? server/client ? 
+                                                    I am a client component
+
+important point - next js keep all resources as server side , 
+                    when we use "use Client " in component file then it is hydrated to client component
+
+
+Server side pre-rendering - server component are rendered only on the server side while client components are pre-rendered 
+                            on the server side to create static cell then hydrated in the client side
+
+(this means everything within the client component doesnot require interactivity or isn't dependent on browser, 
+is still rednderd in the server, the codes or parts which rely on the browser or 
+require interactivity are left as placeholder during server side pre-rendering when they reach the client 
+then browser rendered the client components and fill in the placeholder left by the server )
+
+- whenever we need interactivity , then only we need to change into client component
+
+------------------------------- Routing ----------------------
+
+- nextjs using file based routing system ,  it's built in with themselves 
+- about / page.tsx - every file sould be in this format only 
+
+Nested-routing -> if we have two file inside one folder then we can't create two page.tsx , that time we need nested-routing
+                -> for nested routing , we need to create folder ,then create page.tsx inside them
+                -> ex - dasboard / analytics /page.tsx
+                      - dasboard / users/page.tsx
+                -> we can also create dasboard/page.tsx if we need to create dasboard page , else there will be showing 404 error 
+
+Dynamic Routing - If we have 5 users , and when we have to show the each user profile , then we can't create folder for each of them ,
+                  so , that time , i can use dynamic routing - dasboard/users/[id]/page.tsx
+
+Example: we have five users 
+In users/page.tsx (code):
+
+import Link from "next/link"
+
+const page = () => {
+  return (
+    <div>
+        <h1>Dashboard Users</h1>
+        //all the user is linked with their user profile
+        <ul className="mt-10" >
+            <li><Link href="/dashboard/users/1">User 1</Link></li>
+            <li><Link href="/dashboard/users/2">User 2</Link></li>
+            <li><Link href="/dashboard/users/3">User 3</Link></li>
+            <li><Link href="/dashboard/users/4">User 4</Link></li>
+            <li><Link href="/dashboard/users/5">User 5</Link></li>
+        </ul>
+    </div>
+  )
+}
+
+export default page
+
+
+In users/[id]/page.tsx (code):
+
+import React from 'react'
+//here params is used to initialize the id to each users 
+const page = ({ params } : {params : {id: string}}) => {
+    const { id } = params;
+
+
+  return (
+    //id is used here , which user will be clicked their profile will be shown
+    <div className='text-3xl' >User Profile: { id}</div>
+  )
+}
+
+export default page
+
+----------------------layout------------------------------------
+-layout acts as parent of all routes 
+- we can put navbar , footer  to show them in all pages
+
+for Example:  (This is the code of main layout.tsx file ), i have done some changes before children rendered, due to that , that changes can be seen in all the page 
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Hello Next.js",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        {/* this will be seen in all the pages  */}
+        <h1 className="text-3xl" >ROOT</h1>
+        {children}
+      </body>
+    </html>
+  );
+}
+
+Example 2 : i can also create custom layout also. but their name also be the (layout.tsx), then only nextjs can understand 
+
+- if i create app/dasboard/layout.tsx (custom layout)
+
+code :
+
+import React from 'react'
+
+const layout = ({ children}: {children: React.ReactNode}) => {
+  return (
+    <div>
+        //this Dashboard Navbar will be shown in all the pages of Dashboard
+        <h1 className="text-3xl" >Dashboard Navbar</h1>
+        {children}
+    </div>
+  )
+}
+
+export default layout
+
+
+---------------------- Routes Groups ---------------------
+
+- Route Grouts allows you to organize the routes segments without impacting url path 
+- by rapping the folder name inside the pranthesis -> ( )
+- moving dasboard to (dasboard), and also move page.tsx from dasboard to (dasboard)
+- moving page.tsx (primary home page ) from app to (root) , and also move about folder to (root)
+
+
+- create layout.tsx in (route) , and their code is :
+
+import React from 'react'
+
+const layout = ({children}: {children: React.ReactNode}) => {
+  return (
+    <div>
+        <h1 className='text-3xl'>NavBar</h1>
+        { children}
+    </div>
+  )
+}
+
+export default layout
+
+-> they will work same as previous one 
+
+---------------------- Error Handling ---------------------------
+
+-> in next js there is special file called error.js or .ts and display them in UI 
+
+Example : about/page.tsx
+
+import React from "react"
+
+const page = () => {
+  throw new Error("Not implemented") // this line will throw error , if we done any mistake 
+
+  return (
+    <div>About</div>
+  )
+}
+
+export default page
+
+in (root)/error.tsx - this component will show the error in try again format ( their code will look like this )
+
+'use client' // Error boundaries must be Client Components
+ 
+import { useEffect } from 'react'
+ 
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  useEffect(() => {
+    // Log the error to an error reporting service
+    console.error(error)
+  }, [error])
+ 
+  return (
+    <div>
+      <h2>Something went wrong!</h2>
+      <button
+        onClick={
+          // Attempt to recover by trying to re-render the segment
+          () => reset()
+        }
+      >
+        Try again
+      </button>
+    </div>
+  )
+}
+
+--------------------global error handling -------------------------
+
+-> you can create error file specific page also 
+-> if you have one error , then you can create one global error handling file 
+ 
+ 
+ - global-error.tsx  - in main directory ( in app folder)
+ - their code will look like this :
+ 'use client' // Error boundaries must be Client Components
+ 
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  return (
+    // global-error must include html and body tags
+    <html>
+      <body>
+        <h2>Global Error </h2>
+        <button onClick={() => reset()}>Try again</button>
+      </body>
+    </html>
+  )
+}
+
+-> now , also there will be showing the error of error.tsx only, beacuse error.tsx file is nearest (parent Cell) to the about/page.tsx file
+
+------------------------Loading UI'S -------------------------------------------
+
+-> Loading can be seen, if the user have slow internet connection during the data fetching
+-> it's as simple as error file ,  only you need to create file in app folder called loading.tsx
+-> but i don't know, it is showing for /about page only
+
+code(loading.tsx)
+import React from 'react'
+
+const loading = () => {
+  return (
+    <div>loading.................</div> // this will be seen , if data fetching taking time 
+  )
+}
+
+export default loading
+
+--------------------- ServerComponentHmrCache --------------------------------
+- allows you to cache fetch responses in server component across Hot Module Replacement (HMR) refreshes in  
+  local development.
+ - This results in fster responses and reduced costs for billed Api calls.
+
+ - reduced cost and time to fetch the data
+ - better seo 
+ - reduces duplication req
+ - better protective sensative key
+ - parallelized fetching
+
+ -------------------- static site generation (SSG) -------------------------------------
+
+ - it is technique , where html is generated at built time
+ - with static rendering, routes are rendered at built time, or in the background after data revalidation.
+ - The result is cached and can be pushed to a content delivery Network (cdn) .
+ - This optimization allows you to share the result of the rendering work netween users and server requests.
+ - static rendering is useful when a route has data that is not personalized to the user and can be known at built time, such as static blog post or product page.
+
+ ----------------------------Server-side Rendering (SSR)-----------------------------------
+
+Also referred to as "SSR" or "Dynamic Rendering".
+
+If a page uses Server-side Rendering, the page HTML is generated on each request.
+
+To use Server-side Rendering for a page, you need to export an async function called getServerSideProps. This function will be called by the server on every request.
+
+For example, suppose that your page needs to pre-render frequently updated data (fetched from an external API). You can write getServerSideProps which fetches this data and passes it to Page like below:
+
+
+export default function Page({ data }) {
+  // Render data...
+}
+ 
+// This gets called on every request
+export async function getServerSideProps() {
+  // Fetch data from external API
+  const res = await fetch(`https://.../data`)
+  const data = await res.json()
+ 
+  // Pass data to the page via props
+  return { props: { data } }
+}
+
+--------------------------Automatic Static Optimization -----------------------------------
+
+Next.js automatically determines that a page is static (can be prerendered) if it has no blocking data requirements. This determination is made by the absence of getServerSideProps and getInitialProps in the page.
+
+This feature allows Next.js to emit hybrid applications that contain both server-rendered and statically generated pages.
+
+Good to know: Statically generated pages are still reactive. Next.js will hydrate your application client-side to give it full interactivity.
+
+One of the main benefits of this feature is that optimized pages require no server-side computation, and can be instantly streamed to the end-user from multiple CDN locations. The result is an ultra fast loading experience for your users.
+
+How it works
+If getServerSideProps or getInitialProps is present in a page, Next.js will switch to render the page on-demand, per-request (meaning Server-Side Rendering).
+
+If the above is not the case, Next.js will statically optimize your page automatically by prerendering the page to static HTML.
+
+During prerendering, the router's query object will be empty since we do not have query information to provide during this phase. After hydration, Next.js will trigger an update to your application to provide the route parameters in the query object.
+
+The cases where the query will be updated after hydration triggering another render are:
+
+The page is a dynamic-route.
+The page has query values in the URL.
+Rewrites are configured in your next.config.js since these can have parameters that may need to be parsed and provided in the query.
+To be able to distinguish if the query is fully updated and ready for use, you can leverage the isReady field on next/router.
+
+Good to know: Parameters added with dynamic routes to a page that's using getStaticProps will always be available inside the query object.
+
+next build will emit .html files for statically optimized pages. For example, the result for the page pages/about.js would be:
+
+Terminal
+
+.next/server/pages/about.html
+And if you add getServerSideProps to the page, it will then be JavaScript, like so:
+
+Terminal
+
+.next/server/pages/about.js
+Caveats
+- If you have a custom App with getInitialProps then this optimization will be
+ turned off in pages without Static Generation.
+- If you have a custom Document with getInitialProps be sure you check if ctx.req is defined before 
+assuming the page is server-side rendered.
+ctx.req will be undefined for pages that are prerendered.
+- Avoid using the asPath value on next/router in the rendering tree until the router's isReady field is true. 
+  Statically optimized pages only know asPath on the client and not the server, 
+  so using it as a prop may lead to mismatch errors. The active-class-name example demonstrates 
+  one way to use asPath as a prop.
+
+------------------------Client-side Rendering (CSR)-------------------------------------
+
+
+In Client-Side Rendering (CSR) with React, the browser downloads a minimal HTML page and the JavaScript needed for the page. The JavaScript is then used to update the DOM and render the page. When the application is first loaded, the user may notice a slight delay before they can see the full page, this is because the page isn't fully rendered until all the JavaScript is downloaded, parsed, and executed.
+
+After the page has been loaded for the first time, navigating to other pages on the same website is typically faster, as only necessary data needs to be fetched, and JavaScript can re-render parts of the page without requiring a full page refresh.
+
+In Next.js, there are two ways you can implement client-side rendering:
+
+Using React's useEffect() hook inside your pages instead of the server-side rendering methods (getStaticProps and getServerSideProps).
+Using a data fetching library like SWR or TanStack Query to fetch data on the client (recommended).
+Here's an example of using useEffect() inside a Next.js page:
+
+pages/index.js
+
+import React, { useState, useEffect } from 'react'
+ 
+export function Page() {
+  const [data, setData] = useState(null)
+ 
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('https://api.example.com/data')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const result = await response.json()
+      setData(result)
+    }
+ 
+    fetchData().catch((e) => {
+      // handle the error as needed
+      console.error('An error occurred while fetching the data: ', e)
+    })
+  }, [])
+ 
+  return <p>{data ? `Your data: ${data}` : 'Loading...'}</p>
+}
+In the example above, the component starts by rendering Loading.... Then, once the data is fetched, it re-renders and displays the data.
+
+Although fetching data in a useEffect is a pattern you may see in older React Applications, we recommend using a data-fetching library for better performance, caching, optimistic updates, and more. Here's a minimum example using SWR to fetch data on the client:
+
+pages/index.js
+
+import useSWR from 'swr'
+ 
+export function Page() {
+  const { data, error, isLoading } = useSWR(
+    'https://api.example.com/data',
+    fetcher
+  )
+ 
+  if (error) return <p>Failed to load.</p>
+  if (isLoading) return <p>Loading...</p>
+ 
+  return <p>Your Data: {data}</p>
+}
+
+----------------- More TO Know  ---------------------------------
+
+
+-----------------First project (New StartUp)-----------------------------------------------------------------------------
+
+-> npx create-next-app@latest (to install)
+-> also we need to do some changes in package.json
+      },
+  "packageManager": "npm@10.5.2",
+  "overrides": {
+    "react": "$react",
+    "react-dom": "$react-dom",
+    "next": "$next"
+  },
+  "dependencies": {
+
+  - npm run dev
+  
+  -------------- Next Authentication -----------------
+
+  - npm install next-auth@beta
+  - npx auth secret
+  - create auth.ts
+  
+  -create app> api folder > auth > [...nextauth] > route.ts 
+    ( code of route.ts )
+    
+    import { handlers } from "@/auth" // Referring to the auth.ts we just created
+    export const { GET, POST } = handlers 
+
+    
+- create auth > by using github > go to github > dev setting > github auth > create > set port > copy client id and client secret and paste it into the .env.local
+- create app > component > NavBar 
+- crate signIn , signOut button in navbar
+-  create hero section (pink container)
+- create search tag , search format
+
