@@ -1,3 +1,5 @@
+
+
 to create : npx create-next-app@latest
 tsconfig.json - configuration file for typescript , what should be type checked and ignored
 tailwind.config.ts - additonal tailwind setup
@@ -537,4 +539,4 @@ export function Page() {
 - crate signIn , signOut button in navbar
 -  create hero section (pink container)
 - create search tag , search format
-
+-
